@@ -12,17 +12,25 @@
 using namespace std;
 
 int counter;
+struct timeval start_time;
+struct timezone tz;
+
+
 
 void func(int sig)
 
 {   int a;
     counter++;
+    struct timeval *start, stop;
+    time_t  timev;
     int status;
     int proc = fork();
-    clock_t start = clock();
+
     if (proc == 0) {
+        gettimeofday(start, &tz);
         cout << endl << "__________Дочерний процесс__________" << endl << "pid = " << getpid() << endl;
-        time_t  timev;
+
+
         time(&timev);
         cout << "Запуск дочернего процесса " << ctime(&timev) << endl;
         for (int i = 0; i < 10000000; i++)
@@ -32,13 +40,16 @@ void func(int sig)
         exit(0);
     } else{
 
+        if (proc > 0) {
+            waitpid(proc, &status, NULL);
 
-        waitpid(proc, &status, WNOHANG);
+            gettimeofday(&stop, &tz);
+            cout << "Время работы дочернего процесса с pid " << proc << " " << (stop.tv_sec - start.tv_sec) << " сек"
+                 << endl; //Получаем время работы дочернего процесса в секундах
 
-        clock_t stop = clock();
-        cout << "Время работы дочернего процесса с pid " << proc << " " <<(stop- start) << " такта" << endl; //Получаем время работы дочернего процесса в секундах
-
-        cout << "Время работы программы " << clock() << " тактов" << endl << "_____________________________________________________" << endl;
+            cout << "Время работы программы " << (stop.tv_sec - start_time.tv_sec) << " сек" << endl
+                 << "_____________________________________________________" << endl;
+        }
         return;
     }
 
@@ -46,6 +57,13 @@ void func(int sig)
 
 int main(int argc, char * argv[]) {
     counter = 0;
+    tz.tz_minuteswest = 0;
+    tz.tz_dsttime = 0;
+
+
+
+    gettimeofday(&start_time, &tz);
+
 
     struct itimerval  A,B;
     struct sigaction act;
