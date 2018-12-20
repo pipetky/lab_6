@@ -21,13 +21,13 @@ void func(int sig)
 
 {   int a;
     counter++;
-    struct timeval *start, stop;
+    struct timeval start, stop;
     time_t  timev;
     int status;
     int proc = fork();
-
+    gettimeofday(&start, &tz);
     if (proc == 0) {
-        gettimeofday(start, &tz);
+
         cout << endl << "__________Дочерний процесс__________" << endl << "pid = " << getpid() << endl;
 
 
@@ -44,10 +44,10 @@ void func(int sig)
             waitpid(proc, &status, NULL);
 
             gettimeofday(&stop, &tz);
-            cout << "Время работы дочернего процесса с pid " << proc << " " << (stop.tv_sec - start.tv_sec) << " сек"
-                 << endl; //Получаем время работы дочернего процесса в секундах
+            cout << "Время работы дочернего процесса с pid " << proc << " " << (stop.tv_sec - start.tv_sec) << " сек "
+                 << (stop.tv_usec - start_time.tv_usec) << " микросекунд" << endl; //Получаем время работы дочернего процесса в секундах
 
-            cout << "Время работы программы " << (stop.tv_sec - start_time.tv_sec) << " сек" << endl
+            cout << "Время работы программы " << (stop.tv_sec - start_time.tv_sec) << " сек " << (stop.tv_usec - start_time.tv_usec) << " микросекунд" <<endl
                  << "_____________________________________________________" << endl;
         }
         return;
